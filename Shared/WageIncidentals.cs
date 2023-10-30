@@ -151,7 +151,7 @@ namespace BlazorApp.Shared
         public async Task<bool> UpdateSalaryBase(double salaryBase)
         {
             this.SalaryBase = salaryBase;
-            this.SalaryTaxable = this.SalaryBase * (1 - this.AhvIvEo) * (1 - this.ALV) * (1 - this.BVG) * (1 - this.AccidentInsurance) * (1 - this.SicknessDailyRate);
+            this.SalaryTaxable = this.SalaryBase * (1 - this.AhvIvEo) * (1 - this.ALV) * (1 - this.BVG) * (1 - this.AccidentInsurance) * (1 - this.SicknessDailyRate) * (1 - this.VAT);
             Task<double> incomeTax = this.GetRatesAsync(2023, this.SalaryTaxable);
             this.IncomeTax = await incomeTax;
             this.SalaryNet = (this.SalaryTaxable - this.IncomeTax) * (1 - getHolidayRate());
@@ -168,6 +168,11 @@ namespace BlazorApp.Shared
         public WageIncidentalsSalaried(int age)
         {
             age = (age < 18) ? 18 : (age > 70) ? 70 : age;
+            setBVGBasedOnAge(age);
+        }
+
+        private void setBVGBasedOnAge(int age)
+        {
             if (age < 25)
             {
                 BVG = 0.0;
@@ -189,6 +194,7 @@ namespace BlazorApp.Shared
                 BVG = 0.18 / 2;
             }
         }
+
         public override String Name { get; } = "Salaried";
         public override double VAT { get; } = 0.0;
         public override double AhvIvEo { get; } = 0.053;
@@ -215,7 +221,11 @@ namespace BlazorApp.Shared
         {
             WeeksOfHolidays = (weeksOfHolidays < 4) ? 4 : (weeksOfHolidays > 6) ? 6 : weeksOfHolidays; ;
             age = (age < 18) ? 18 : (age > 70) ? 70 : age;
+            setBVGBasedOnAge(age);
+        }
 
+        private void setBVGBasedOnAge(int age)
+        {
             if (age < 25)
             {
                 BVG = 0.013;
@@ -243,15 +253,15 @@ namespace BlazorApp.Shared
         }
 
         public override String Name { get; } = "Contractor";
-        public override double VAT { get; } = 0.77;
-        public override double AhvIvEo { get; } = 0.1;
+        public override double VAT { get; } = 7.7 / 100;
+        public override double AhvIvEo { get; } = 10.0 / 100;
         public override double ALV { get; } = 0;
 
         public override double BVG { get; set; } = 0.0;
 
-        public override double AccidentInsurance { get; } = 0.32 + 0.0952;
+        public override double AccidentInsurance { get; } = 0.32 / 100;
 
-        public override double SicknessDailyRate { get; } = 0.015;
+        public override double SicknessDailyRate { get; } = 0.15 / 100;
 
         public override double SalaryTaxable { get; set; } = 0;
 
@@ -265,15 +275,15 @@ namespace BlazorApp.Shared
         {
             if (this.WeeksOfHolidays == 4)
             {
-                return 0.083;
+                return 8.3 / 100;
             }
             else if (this.WeeksOfHolidays == 5)
             {
-                return 0.1064;
+                return 10.64 / 100;
             }
             else if (this.WeeksOfHolidays == 6)
             {
-                return 0.1304;
+                return 13.04 / 100;
             }
             else { return 0.0; }
         }
